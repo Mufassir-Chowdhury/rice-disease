@@ -20,7 +20,7 @@
     async function submitForm(event) {
         const formData = new FormData();
         formData.append('file', imageBlob);
-        const response = await fetch('http://localhost:8000/predict', {
+        const response = await fetch('http://4.193.146.151:8000/predict', {
             method: 'POST',
             body: formData,
         });
