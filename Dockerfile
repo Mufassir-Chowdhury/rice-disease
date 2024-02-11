@@ -1,32 +1,24 @@
-# Use an official Node.js runtime as the base image
-FROM node:14 as build
+FROM node:18-alpine AS builder
 
-# Set the working directory in the container
+RUN mkdir /app && mkdir /app/data
+
+COPY . /app
+
 WORKDIR /app
 
-# Copy package.json and package-lock.json to the working directory
-COPY package*.json ./
+RUN npm install && \
+    npm run build
 
-# Install dependencies
-RUN npm install
+FROM node:18-alpine
 
-# Copy the rest of the application files
-COPY . .
+RUN mkdir /app
 
-# Build the Svelte application
-RUN npm run build
+COPY --from=builder /app/build /app/build
+COPY --from=builder /app/package.json /app/package-lock.json /app/
 
-# Copy the built SvelteKit files from .svelte-kit/output directory
-COPY .svelte-kit/output ./public
+WORKDIR /app
 
-# Use NGINX as the web server
-FROM nginx:alpine
+RUN npm install --production && \
+    npm cache clean --force
 
-# Copy the built SvelteKit files to NGINX HTML directory
-COPY --from=build /app/public /usr/share/nginx/html
-
-# Expose port 80
-EXPOSE 80
-
-# Command to run NGINX
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["node", "build/index.js"]

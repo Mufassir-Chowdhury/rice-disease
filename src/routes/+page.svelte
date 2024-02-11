@@ -1,21 +1,6 @@
 <script>
-    let video;
-    let canvas;
-    let ctx;
     let imageBlob;
     let prediction;
-
-    async function startCamera() {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        video.srcObject = stream;
-    }
-
-    function captureImage() {
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        canvas.toBlob(blob => {
-            imageBlob = blob;
-        });
-    }
     function handleFileInputChange(e) {
         const files = e.target.files;
         if (files.length > 0) {
@@ -32,28 +17,6 @@
     }
 
 
-    function handleDragOver(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        e.target.closest('.upload-container').classList.add('drag-over');
-    }
-
-    function handleDragLeave(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        e.target.closest('.upload-container').classList.remove('drag-over');
-    }
-
-    function handleDrop(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        const files = e.dataTransfer.files;
-        if (files.length > 0) {
-            imageBlob = files[0];
-        }
-        e.target.closest('.upload-container').classList.remove('drag-over');
-    }
-
     async function submitForm(event) {
         const formData = new FormData();
         formData.append('file', imageBlob);
@@ -67,62 +30,98 @@
     }
 </script>
 
-<!-- <svelte:window on:load={startCamera} /> -->
 <form on:submit|preventDefault={submitForm} class="flex flex-col items-center space-y-4">
-    <!-- <video bind:this={video} autoplay></video>
-    <canvas bind:this={canvas} width="640" height="480"></canvas> -->
-    <!-- <button type="button" on:click={captureImage} class="px-4 py-2 bg-blue-500 text-white rounded">Capture</button> -->
-    <div class="upload-container"
-         on:dragover={handleDragOver}
-         on:dragleave={handleDragLeave}
-         on:drop={handleDrop}>
+    <div class="upload-container">
         <input type="file" id="fileInput" on:change={handleFileInputChange} class="file-input" />
         <label for="fileInput" class="file-input-label">
-            <span>Choose a file or drag it here</span>
+            <span>Choose a file</span>
         </label>
         <!-- Display the uploaded image -->
-        <img id="imagePreview" alt="Uploaded Image" class="my-4 w-64 h-64 object-cover hidden" />
+        <img id="imagePreview" alt="Uploaded Image" class="my-4 image-preview" />
     </div>
-    <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded">Upload</button>
+    <button type="submit" class="upload-button">Submit</button>
 </form>
 {#if prediction}
-    <div class="mt-4 text-lg font-bold px-28">
+    <div class="prediction-container">
         <p>Predictions:</p>
-        <ul class="list-disc pl-8 flex flex-col">
-            <div>
-                Leaf Blight: {prediction['blight']}
-            </div>
-            <div>
-                Blast: {prediction['blast']}
-            </div>
-            <div>
-                Brown Spot: {prediction['brownspot']}
-            </div>
+        <ul class="prediction-list">
+            <li>Leaf Blight: {prediction['blight']}</li>
+            <li>Blast: {prediction['blast']}</li>
+            <li>Brown Spot: {prediction['brownspot']}</li>
         </ul>
     </div>
 {/if}
 <style>
+
     .upload-container {
-        @apply relative mt-8 w-96 h-72 border-2 border-dashed border-gray-300 rounded-lg flex justify-center items-center cursor-pointer;
+        margin-top: 20px;
+        width: 400px;
+        height: 300px;
+        border: 2px dashed #ccc;
+        border-radius: 8px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        position: relative;
     }
 
     .file-input {
-        @apply hidden;
+        display: none;
     }
 
     .file-input-label {
-        @apply absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        cursor: pointer;
     }
 
     .file-input-label span {
-        @apply text-base text-gray-600;
+        font-size: 16px;
+        color: #666;
     }
 
     .file-input-label:hover {
-        @apply bg-gray-100;
+        background-color: #f0f0f0;
     }
 
-    .file-input-label.drag-over {
-        @apply bg-gray-200;
+    .image-preview {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: none;
     }
+
+    .upload-button {
+        padding: 10px 20px;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    .upload-button:hover {
+        background-color: #45a049;
+    }
+
+    .prediction-container {
+        margin-top: 20px;
+        text-align: center;
+    }
+
+    .prediction-list {
+        list-style-type: none;
+        padding: 0;
+    }
+
+    .prediction-list li {
+        margin-top: 10px;
+        font-weight: bold;
+    }
+
 </style>
