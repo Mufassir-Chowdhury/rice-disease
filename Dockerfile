@@ -10,8 +10,5 @@ COPY . .
 # Expose port 3000 to the outside world
 EXPOSE 3000
 
-# Install any needed packages specified in requirements.txt
-# (no packages needed for this simple example)
-
 # Run app.py when the container launches
 CMD ["python", "-m", "http.server", "3000"]
