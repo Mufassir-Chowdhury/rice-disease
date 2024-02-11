@@ -1,8 +1,17 @@
-# Use an official lightweight Nginx image
-FROM nginx:alpine
+# Use an official lightweight Python image
+FROM python:3.9-slim
 
-# Copy static files into the container
-COPY . /usr/share/nginx/html
+# Set the working directory in the container
+WORKDIR /usr/src/app
 
-# Expose port 80 to the outside world
+# Copy the current directory contents into the container at /usr/src/app
+COPY . .
+
+# Expose port 3000 to the outside world
 EXPOSE 3000
+
+# Install any needed packages specified in requirements.txt
+# (no packages needed for this simple example)
+
+# Run app.py when the container launches
+CMD ["python", "-m", "http.server", "3000"]
