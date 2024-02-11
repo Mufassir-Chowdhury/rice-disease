@@ -1,24 +1,8 @@
-FROM node:18-alpine AS builder
+# Use an official lightweight Nginx image
+FROM nginx:alpine
 
-RUN mkdir /app && mkdir /app/data
+# Copy static files into the container
+COPY . /usr/share/nginx/html
 
-COPY . /app
-
-WORKDIR /app
-
-RUN npm install && \
-    npm run build
-
-FROM node:18-alpine
-
-RUN mkdir /app
-
-COPY --from=builder /app/build /app/build
-COPY --from=builder /app/package.json /app/package-lock.json /app/
-
-WORKDIR /app
-
-RUN npm install --production && \
-    npm cache clean --force
-
-CMD ["node", "build/index.js"]
+# Expose port 80 to the outside world
+EXPOSE 3000
