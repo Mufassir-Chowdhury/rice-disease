@@ -1,5 +1,3 @@
-
-
 from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 import numpy as np
@@ -9,7 +7,6 @@ import tensorflow as tf
 
 app = FastAPI()
 
-# Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -18,26 +15,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-
 MODEL = tf.keras.models.load_model("./model/1")
-
 
 @app.get("/ping")
 async def ping():
     return "Hello, I am alive"
 
-def read_file_as_image(data) -> np.ndarray:
-    image = Image.open(BytesIO(data))
-    image = image.resize((256, 256))
-    if image.mode == 'RGBA':
-        # If image has alpha channel, remove it
-        image = image.convert('RGB')
-    return np.array(image)
-
 @app.post("/predict")
 def predict(file: UploadFile = File(...)):
-    image = read_file_as_image(file.file.read())
+    image = Image.open(BytesIO(file.file.read()))
+    image = image.resize((256, 256))
+    if image.mode == 'RGBA':
+        image = image.convert('RGB')
+    image = np.array(image)
     image = np.expand_dims(image, axis=0)
     prediction = MODEL.predict(image)
     return {
